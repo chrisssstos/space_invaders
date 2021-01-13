@@ -114,6 +114,9 @@ class Spaceship(pygame.sprite.Sprite):
             # bullet_group.add(bullet2)
             self.last_shot= time_now
 
+        if key[pygame.K_ESCAPE]:
+            pygame.quit()
+
         #draw health bar
         # pygame.draw.rect(screen, red, (self.rect.x, (self.rect.bottom+10), self.rect.width,15))
         # if self.health_remaining>0:
