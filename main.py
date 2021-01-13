@@ -29,8 +29,8 @@ explosion_fx.set_volume(1.25)
 laser_fx = pygame.mixer.Sound("sounds/laser.wav")
 laser_fx.set_volume(0.25)
 #gamevariables
-rows=2
-cols=9
+rows=6
+cols=4
 countdown = 3
 last_count = pygame.time.get_ticks()
 game_over =0 # 0 no gme over,1 win
@@ -48,12 +48,12 @@ def draw_bg():
 #def function for creating text
 def draw_text(text,font,text_col,x,y):
     img= font.render(text,True,text_col)
-    img = pygame.transform.rotate(img, 270)
+    img = pygame.transform.rotate(img, 90)
     img = pygame.transform.scale(img, (100, 500))
     screen.blit(img,(x,y))
 def draw_cnt(text,font,text_col,x,y):
     img= font.render(text,True,text_col)
-    img = pygame.transform.rotate(img, 270)
+    img = pygame.transform.rotate(img, 90)
     img = pygame.transform.scale(img, (300, 150))
     screen.blit(img,(x,y))
 
@@ -66,6 +66,7 @@ class Spaceship(pygame.sprite.Sprite):
         for num in range (0,5):
             img= pygame.image.load(f"img/spaceship sprite/sprite_{num}.png").convert_alpha()
             img = pygame.transform.scale(img,(256, 256))
+            img = pygame.transform.rotate(img, 180)
             #add to list
             self.images.append(img)
 
@@ -97,20 +98,20 @@ class Spaceship(pygame.sprite.Sprite):
             self.counter=0
         #get key press
         key = pygame.key.get_pressed()
-        if key[pygame.K_DOWN] and self.rect.left>0:
-            self.rect.x-=speed
-        if key[pygame.K_UP] and self.rect.right<screen_w:
-            self.rect.x+=speed
+        if key[pygame.K_DOWN] and self.rect.top>0:
+            self.rect.y-=speed
+        if key[pygame.K_UP] and self.rect.bottom<screen_h:
+            self.rect.y+=speed
 
         #record current time
         time_now = pygame.time.get_ticks()
         #shoot
         if key[pygame.K_SPACE] and time_now-self.last_shot > cooldown:
             laser_fx.play()
-            bullet =Bullets(self.rect.centerx,self.rect.top)
+            bullet =Bullets(self.rect.left,self.rect.centery)
             bullet_group.add(bullet)
-            bullet2 = Bullets2(self.rect.centerx, self.rect.bottom)
-            bullet_group.add(bullet2)
+            # bullet2 = Bullets2(self.rect.centerx, self.rect.bottom)
+            # bullet_group.add(bullet2)
             self.last_shot= time_now
 
         #draw health bar
@@ -125,10 +126,11 @@ class Bullets(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load("img/bullet.png").convert_alpha()
         self.rect = self.image.get_rect()
+        self.image = pygame.transform.rotate(self.image, 90)
         self.rect.center = [x,y]
 
     def update(self):
-        self.rect.y -=5
+        self.rect.x -=8
         if self.rect.bottom<0:
             self.kill()
         if pygame.sprite.spritecollide(self,virus_group, True):
@@ -138,21 +140,21 @@ class Bullets(pygame.sprite.Sprite):
             explosion_group.add(explosion)
 
 
-class Bullets2(pygame.sprite.Sprite):
-    def __init__(self,x,y):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("img/bullet.png").convert_alpha()
-        self.rect = self.image.get_rect()
-        self.rect.center = [x,y]
-
-    def update(self):
-        self.rect.y +=5
-        if self.rect.top>screen_h:
-            self.kill()
-        if pygame.sprite.spritecollide(self,virus_group, True):
-            self.kill()
-            explosion = Explosion(self.rect.centerx,self.rect.centery+63,1)
-            explosion_group.add(explosion)
+# class Bullets2(pygame.sprite.Sprite):
+#     def __init__(self,x,y):
+#         pygame.sprite.Sprite.__init__(self)
+#         self.image = pygame.image.load("img/bullet.png").convert_alpha()
+#         self.rect = self.image.get_rect()
+#         self.rect.center = [x,y]
+#
+#     def update(self):
+#         self.rect.y +=5
+#         if self.rect.top>screen_h:
+#             self.kill()
+#         if pygame.sprite.spritecollide(self,virus_group, True):
+#             self.kill()
+#             explosion = Explosion(self.rect.centerx,self.rect.centery+63,1)
+#             explosion_group.add(explosion)
 
 
 #Viruses class
@@ -161,6 +163,7 @@ class Viruses(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load("img/virus " + str(random.randint(1,3)) + ".png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (125, 125))
+        self.image = pygame.transform.rotate(self.image, 180)
         self.rect = self.image.get_rect()
         self.rect.center = [x,y]
         self.move_count=0
@@ -214,15 +217,14 @@ def create_viruses():
     #gnerate aliens
     for row in range(rows):
         for item in range(cols):
-            virus = Viruses(150+ item*200, 100+row*150)
-            virus2 = Viruses(150 + item * 200, 1080-240 + row * 150)
+            virus = Viruses(350+ item*200, 150+row*150)
             virus_group.add(virus)
-            virus_group.add(virus2)
+
 
 create_viruses()
 
 #create player
-spaceship = Spaceship(int(screen_w/2),int(screen_h/2),3)
+spaceship = Spaceship(int(screen_w-256),int(screen_h/2),3)
 spaceship_group.add(spaceship)
 
 
@@ -245,7 +247,7 @@ while run:
             bullet_group.update()
             virus_group.update()
         elif game_over==1:
-            draw_text('YOU WIN!', font40, white, int(screen_w / 2) - 500, int(screen_h / 2) - 240)
+            draw_text('YOU WIN!', font40, white, int(screen_w) - 256, int(screen_h / 2) - 240)
 
 
     explosion_group.update()
@@ -257,8 +259,8 @@ while run:
     explosion_group.draw(screen)
 
     if countdown>0:
-        draw_text('GET READY!',font40,white,int(screen_w/2)-500,int(screen_h/2)-240)
-        draw_cnt(str(countdown), font40, white, int(screen_w / 2) - 800, int(screen_h / 2) - 70)
+        draw_text('GET READY!',font40,white,int(screen_w-600),int(screen_h/2)-240)
+        draw_cnt(str(countdown), font40, white, int(screen_w ) - 400, int(screen_h / 2) - 70)
         count_timer = pygame.time.get_ticks()
         if count_timer - last_count >1000:
             countdown-=1
