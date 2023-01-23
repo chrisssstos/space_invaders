@@ -5,6 +5,10 @@ name = "pypi"
 
 [packages]
 pygame = "*"
+numpy = "*"
+opencv-python = "*"
+shapely = "*"
+mediapipe = "*"
 
 [dev-packages]
 
